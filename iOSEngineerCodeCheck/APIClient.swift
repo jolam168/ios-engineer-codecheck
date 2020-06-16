@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import RxSwift
 
 protocol API {
 	func get(_ url: URL, completion: @escaping (Result<Data, Error>) -> Void)
@@ -47,5 +48,21 @@ class APIClient : API{
 			}
         // これ呼ばなきゃリストが更新されません
 			task.resume()
+	}
+	
+	func call(_ url: URL) -> Observable<Data?>{		
+		Observable<Data?>.create { observer  in
+			let task = URLSession.shared.dataTask(with:url) { (data, res, err) in
+				observer.onNext(data)
+				if err != nil {
+				  observer.onError(err!)
+				}
+				observer.onCompleted()
+			}
+			task.resume()
+			
+			let disposable = Disposables.create()
+			return disposable
+		}
 	}
 }

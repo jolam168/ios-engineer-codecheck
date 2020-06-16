@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class ViewController2: UIViewController {
     
@@ -23,7 +25,6 @@ class ViewController2: UIViewController {
     
 	var item:Item?
 	var imageViewModel:ImageViewModel = ImageViewModel()
-	
     override func viewDidLoad() {
         super.viewDidLoad()
                 
@@ -32,18 +33,18 @@ class ViewController2: UIViewController {
 		WchsLbl.text = "\(item?.watchersCount ?? 0) watchers"
 		FrksLbl.text = "\(item?.forksCount ?? 0) forks"
 		IsssLbl.text = "\(item?.openIssuesCount ?? 0) open issues"
-		
+				
         getImage()
-        
+
     }
     
     func getImage(){
-                
+
 		TtlLbl.text = item?.fullName ?? ""
 
 		if let owner = item?.owner {
 			imageViewModel.fetch(owner.avatarURL) { img in
-				
+
 				DispatchQueue.main.async {
 					self.ImgView.image = img
 				}

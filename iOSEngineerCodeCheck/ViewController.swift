@@ -7,83 +7,66 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
-class ViewController: UITableViewController, UISearchBarDelegate {
+class ViewController: UIViewController{
 
     @IBOutlet weak var SchBr: UISearchBar!
         
-    var task: URLSessionTask?
-    var word: String!
-    var url: String!
+	@IBOutlet var tableView: UITableView!
+	
     var idx: Int!
     
 	var dataViewModel:DataViewModel = DataViewModel()
-	var dataModel = [Item]()
+	let disposeBag = DisposeBag()
 	
+	var dataModel = [Item]()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         SchBr.placeholder = "GitHubのリポジトリを検索できるよー"
-        SchBr.delegate = self
-    }
-    
-    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-        // ↓こうすれば初期のテキストを消せる
-        searchBar.text = ""
-        return true
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        task?.cancel()
-    }
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        
-		word = searchBar.text!.trimmingCharacters(in: .whitespaces)
-        
-        if word.count != 0 {
-            url = "https://api.github.com/search/repositories?q=\(word!)"
-
-			dataViewModel.fetch(url) { items in
-				self.dataModel = items
-				DispatchQueue.main.async {
-					self.tableView.reloadData()
+		SchBr.rx.text.orEmpty
+			.subscribe(onNext: { (String) in
+				let word = String.trimmingCharacters(in: .whitespaces)
+				if word.count != 0 {
+					let url:String = "https://api.github.com/search/repositories?q=\(word)"
+					self.dataViewModel.callAPI(url)
 				}
+			}) {
+				
+		}.disposed(by: self.disposeBag)
+		
+		
+		dataViewModel.itemModel.bind(to: self.tableView.rx.items){ (tableView, row, element) in
+			let cell = tableView.dequeueReusableCell(withIdentifier: "Repository")!
+			cell.textLabel?.text = element.fullName
+			cell.detailTextLabel?.text = element.language
+			cell.tag = row
+			return cell
+		}.disposed(by: self.disposeBag)
+		
+		tableView.rx.itemSelected.subscribe(onNext: { (IndexPath) in
+			self.idx = IndexPath.row
+			DispatchQueue.main.async {
+				self.performSegue(withIdentifier: "Detail", sender: self)
 			}
+		}) {
 			
-        }
-        
+		}.disposed(by: self.disposeBag)
+		
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "Detail"{
             let dtl = segue.destination as! ViewController2
-			dtl.item = dataModel[idx]
+			dtl.item = dataViewModel.itemModel.value[idx]
+
         }
         
     }
-    
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return dataModel.count
-    }
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = UITableViewCell()
-		let github = dataModel[indexPath.row]
-		cell.textLabel?.text = github.fullName
-		cell.detailTextLabel?.text = github.language
-        cell.tag = indexPath.row
-        return cell
-        
-    }
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // 画面遷移時に呼ばれる
-        idx = indexPath.row
-        performSegue(withIdentifier: "Detail", sender: self)
-        
-    }
+
     
 }
