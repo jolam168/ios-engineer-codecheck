@@ -21,8 +21,6 @@ class ViewController: UIViewController{
 	var dataViewModel:DataViewModel = DataViewModel()
 	let disposeBag = DisposeBag()
 	
-	var dataModel = [Item]()
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -39,7 +37,7 @@ class ViewController: UIViewController{
 		}.disposed(by: self.disposeBag)
 		
 		
-		dataViewModel.itemModel.bind(to: self.tableView.rx.items){ (tableView, row, element) in
+		dataViewModel.dataSource.bind(to: self.tableView.rx.items){ (tableView, row, element) in
 			let cell = tableView.dequeueReusableCell(withIdentifier: "Repository")!
 			cell.textLabel?.text = element.fullName
 			cell.detailTextLabel?.text = element.language
@@ -62,7 +60,7 @@ class ViewController: UIViewController{
         
         if segue.identifier == "Detail"{
             let dtl = segue.destination as! ViewController2
-			dtl.item = dataViewModel.itemModel.value[idx]
+			dtl.item = dataViewModel.dataSource.value[idx]
 
         }
         

@@ -12,7 +12,7 @@ import RxCocoa
 
 class DataViewModel{
 	
-	var itemModel : BehaviorRelay<[Item]> = BehaviorRelay(value: [])
+	var dataSource : BehaviorRelay<[Item]> = BehaviorRelay(value: [])
 	var error : Error?
 	let disposeBag = DisposeBag()
 	
@@ -27,7 +27,7 @@ class DataViewModel{
 			let decoder = JSONDecoder()
 			do {
 				let github:Github = try decoder.decode(Github.self, from: data!)
-				self.itemModel.accept(github.items)
+				self.dataSource.accept(github.items)
 			}catch{
 				self.error = error
 			}
