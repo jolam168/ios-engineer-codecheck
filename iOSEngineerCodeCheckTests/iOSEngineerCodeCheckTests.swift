@@ -7,6 +7,8 @@
 //
 
 import XCTest
+
+
 @testable import iOSEngineerCodeCheck
 
 class iOSEngineerCodeCheckTests: XCTestCase {
@@ -22,6 +24,26 @@ class iOSEngineerCodeCheckTests: XCTestCase {
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+		let word = "apple"
+		let url = URL(string:"https://api.github.com/search/repositories?q=\(word)")!
+		
+		
+		let expectation = self.expectation(description: "access valid")
+		
+		APIClient.init().get(url) { result in
+			
+			switch result {
+			case .success( _):
+					expectation.fulfill()
+			case .failure(let error):
+					XCTFail("\(error)")
+				
+			}
+			
+		}
+		
+		waitForExpectations(timeout: 5, handler: nil)
+		
     }
 
     func testPerformanceExample() throws {
