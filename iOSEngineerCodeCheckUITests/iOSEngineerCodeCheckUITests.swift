@@ -30,6 +30,15 @@ class iOSEngineerCodeCheckUITests: XCTestCase {
 
         // Use recording to get started writing UI tests.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+		app.tables["Empty list"].searchFields["GitHubのリポジトリを検索できるよー"].tap()
+		app.tables["Empty list"].searchFields["GitHubのリポジトリを検索できるよー"].typeText("AppleALC")
+		
+		XCTWaiter().wait(for: [expectation(description: "wait")], timeout: 5)
+		
+		XCTAssertTrue(app.tables.staticTexts["acidanthera/AppleALC"].exists)
+		
+		app.tables.staticTexts["acidanthera/AppleALC"].tap()
+
     }
 
     func testLaunchPerformance() throws {
